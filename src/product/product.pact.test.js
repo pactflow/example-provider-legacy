@@ -16,33 +16,30 @@ describe("Pact Verification", () => {
       logLevel: "INFO",
       providerBaseUrl: "http://localhost:8080",
       providerVersion: process.env.GIT_COMMIT,
-      // providerVersionTags: process.env.GIT_BRANCH ? [process.env.GIT_BRANCH] : [], // the old way of publishing verification results with the tag property
-      providerVersionBranch: process.env.GIT_BRANCH
-        ? process.env.GIT_BRANCH
-        : "", // the recommended way of publishing verification results with the branch property
+      providerVersionTags: process.env.GIT_BRANCH ? [process.env.GIT_BRANCH] : [], // the old way of publishing verification results with the tag property
+      // providerVersionBranch: process.env.GIT_BRANCH
+      //   ? process.env.GIT_BRANCH
+      //   : "", // the recommended way of publishing verification results with the branch property
       verbose: process.env.VERBOSE === "true",
     };
 
     // For builds triggered by a 'contract_content_changed' just verify the changed pact.
     // https://docs.pact.io/pact_broker/webhooks#the-contract-content-changed-event
-    // For builds trigged by a 'contract_requiring_verification_published' webhook, verify the changed pact against latest of mainBranch and any version currently deployed to an environment
-    // https://docs.pact.io/pact_broker/webhooks#using-webhooks-with-the-contract_requiring_verification_published-event
     // The URL will bave been passed in from the webhook to the CI job.
     const pactChangedOpts = {
       pactUrls: [process.env.PACT_URL],
     };
 
     // For 'normal' provider builds, fetch the the latest version from the main branch of each consumer, as specified by
-    // the consumer's mainBranch property and all the currently deployed and currently released and supported versions of each consumer.
+    // the consumer's selectors branch property and all the currently deployed of each consumer.
     // https://docs.pact.io/pact_broker/advanced_topics/consumer_version_selectors
     const fetchPactsDynamicallyOpts = {
-      provider: "pactflow-example-provider",
-      //consumerVersionTag: ['master', 'prod'], // the old way of specifying which pacts to verify if using tags
-      // consumerVersionSelectors: [{ tag: 'master', latest: true }, { deployed: true } ], // the newer way of specifying which pacts to verify if using tags
-      consumerVersionSelectors: [
-        { mainBranch: true },
-        { deployed: true },
-      ], // the new way of specifying which pacts to verify if using branches (recommended)
+      provider: "pactflow-example-provider-legacy",
+      consumerVersionSelectors: [{ tag: 'master', latest: true }, { deployed: true } ], // the way of specifying which pacts to verify if using tags
+      // consumerVersionSelectors: [
+      //   { mainBranch: true },
+      //   { deployed: true },
+      // ], // the new way of specifying which pacts to verify if using branches (recommended)
       pactBrokerUrl: process.env.PACT_BROKER_BASE_URL,
       enablePending: false,
       includeWipPactsSince: undefined,
